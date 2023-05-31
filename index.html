@@ -6,11 +6,103 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Nunito&display=swap" rel="stylesheet">
   <link rel="icon" type="image/x-icon" href="./images/favicon.ico">
-  <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha512-Fo3rlrZj/k7ujTnHg4CGR2D7kSs0v4LLanw2qksYuRlEzO+tcaEPQogQ0KaoGN26/zrn20ImR1DfuLWnOo7aBA==" crossorigin="anonymous" referrerpolicy="no-referrer" /> -->
-  <link rel="stylesheet" type=“text/css” href="styles.css">
+  <!-- 
+    FOR SOME REASON GH Pages does NOT expect type="text/css", but the local file server does??
+    BTW also the images will vanish if the CSS can not be detected
+    <link rel="stylesheet" type=“text/css” href="styles.css">
+  -->
   <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
   <title>Razz Devs</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height:100%;
+      background-color: black;
+      box-sizing: border-box;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    #app {
+      height: 100vh;
+      width: 100vw;
+      color: white;
+      margin: 0;
+      padding: 30px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: Nunito, sans-serif;
+    }
+    .page-title {
+      color: hotpink;
+      font-size: 36px;
+      font-weight: bold;
+      margin-bottom: 15px;
+    }
+    .name-buttons-parent {
+      margin-bottom: 10px;
+    }
+    .name-button {
+      color: white;
+      background-color: mediumvioletred;
+      font-family: Nunito, sans-serif;
+      border: none;
+      border-radius: 10px;
+      padding: 10px;
+      font-size: 18px;
+      margin: 5px;
+      text-transform: capitalize;
+    }
+    .name-button:hover {
+      color: black;
+      cursor: pointer;
+      background-color: #993366;
+    }
+    .active-button {
+      border: 2px solid pink;
+      background-color: #993366;
+    }
+    .gallery-parent {
+      height: 100%;
+    }
+    .gallery-image {
+      width: 90vw;
+      height: 100%;
+      border-radius: 5px;
+    }
+    .gallery-buttons-parent {
+      margin-top: 10px;
+      width: 100%;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-evenly;
+    }
+    .gallery-button {
+      width: 100%;
+      height: 100px;
+      margin: 5px;
+      border: none;
+      border-radius: 5px;
+      border: 2px solid black;
+    }
+    .gallery-button:hover {
+      border: 2px solid gray;
+      cursor: pointer;
+    }
+    .active-gallery-button {
+      border: 2px solid pink;
+    }
+    .active-gallery-button:hover {
+      border: 2px solid pink;
+    }
+  </style>
 </head>
+
 <body>
   <div id="app">
     <div class="page-title">
