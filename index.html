@@ -6,11 +6,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Nunito&display=swap" rel="stylesheet">
   <link rel="icon" type="image/x-icon" href="./images/favicon.ico">
-  <!-- 
-    FOR SOME REASON GH Pages does NOT expect type="text/css", but the local file server does??
-    BTW also the images will vanish if the CSS can not be detected
-    <link rel="stylesheet" type=“text/css” href="styles.css">
-  -->
   <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
   <title>Razz Devs</title>
   <style>
@@ -48,31 +43,106 @@
     }
     .name-button {
       color: white;
-      background-color: mediumvioletred;
+      background-color: rgb(4, 166, 225);
       font-family: Nunito, sans-serif;
-      border: none;
+      border: 1px solid gray;
       border-radius: 10px;
       padding: 10px;
       font-size: 18px;
       margin: 5px;
       text-transform: capitalize;
+      transition: all 0.25s ease;
+      box-shadow: 4px 4px 4px inset lightblue, -4px -4px 4px inset rgb(0, 75, 150);
     }
     .name-button:hover {
-      color: black;
       cursor: pointer;
-      background-color: #993366;
+      background-color: rgb(0, 75, 150);
+      box-shadow: 4px 4px 4px inset rgb(4, 166, 225);
     }
     .active-button {
-      border: 2px solid pink;
-      background-color: #993366;
+      border: 1px solid rgb(153, 204, 255);
+      box-shadow: none;
+      background-color: rgb(0, 75, 150);
+    }
+    .active-button:hover {
+      box-shadow: none;
     }
     .gallery-parent {
       height: 100%;
+      width: 100%;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
-    .gallery-image {
-      width: 90vw;
+    .arrows-div {
+      position: absolute;
+      width: 100%;
+      top: 40%;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .arrow {
+      margin: 10px 50px;
+      height: 45px;
+      width: 45px;
+      color: lightblue;
+      background-color: rgba(0,0,0,0.25);
+      border: none;
+      border-radius: 50%;
+      font-size: 40px;
+      transition: all 0.25s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .arrow:hover {
+      cursor: pointer;
+      background-color: rgba(0,0,0,0.5);
+      color: white;
+    }
+    .gallery-image-parent {
+      width: 100%;
       height: 100%;
       border-radius: 5px;
+      background-color: gray;
+      position: relative;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .gallery-image {
+      position: absolute;
+      height: 100%;
+      width: 100%;
+    }
+    .center-slide {
+      left: 0;
+      right: 0;
+    }
+    .prev-slide {
+      right: 100%
+    }
+    .next-slide {
+      left: 100%;
+    }
+    .slide-left {
+      animation: slideLeftAnimation 1s forwards;
+      -webkit-animation: slideLeftAnimation 1s forwards;
+    }
+    @keyframes slideLeftAnimation {
+      100% { transform: translateX(100%); }
+    }
+    .slide-right {
+      animation: slideRightAnimation 1s forwards;
+      -webkit-animation: slideRightAnimation 1s forwards;
+    }
+    @keyframes slideRightAnimation {
+      100% { transform: translateX(-100%); }
     }
     .gallery-buttons-parent {
       margin-top: 10px;
@@ -86,19 +156,19 @@
       width: 100%;
       height: 100px;
       margin: 5px;
-      border: none;
       border-radius: 5px;
-      border: 2px solid black;
+      border: 1px solid black;
+      transition: all 0.25s ease;
     }
     .gallery-button:hover {
-      border: 2px solid gray;
+      border: 1px solid rgb(4, 166, 225);
       cursor: pointer;
     }
     .active-gallery-button {
-      border: 2px solid pink;
+      border: 1px solid white;
     }
     .active-gallery-button:hover {
-      border: 2px solid pink;
+      border: 1px solid white;
     }
   </style>
 </head>
@@ -115,22 +185,53 @@
         v-for="dev in allDevs"
         class="name-button"
         :class="getNameButtonClass(dev.name)"
+        :disabled="disableButtons"
         @click="setSelectedDev(dev)"
       >{{dev.name}}</button>
     </div>
 
     <div class="gallery-parent">
-      <div
-        class="gallery-image"
-        :style="getImageBgStyle(selectedImage, true)"
-      ></div>
+      <div class="gallery-image-parent">
+        <div
+          class="gallery-image prev-slide"
+          :class="{'slide-left': isSlidingLeft, 'slide-right': isSlidingRight}"
+          :style="getImageBgStyle(prevImage)"
+        ></div>
+        <div
+          class="gallery-image center-slide"
+          :class="{'slide-left': isSlidingLeft, 'slide-right': isSlidingRight}"
+          :style="getImageBgStyle(selectedImage)"
+        ></div>
+        <div
+          class="gallery-image next-slide"
+          :class="{'slide-left': isSlidingLeft, 'slide-right': isSlidingRight}"
+          :style="getImageBgStyle(nextImage)"
+        ></div>
+      </div>
+      <div v-if="showArrows" class="arrows-div">
+        <button
+          class="arrow"
+          :disabled="disableButtons"
+          @click="onArrowClick(-1)"
+        >
+          <span><</span>
+        </button>
+        <button
+          class="arrow"
+          :disabled="disableButtons"
+          @click="onArrowClick(1)"
+        >
+          <span>></span>
+        </button>
+      </div>
     </div>
     <div class="gallery-buttons-parent">
       <button
         v-for="(img, idx) in selectedDev.images"
         class="gallery-button"
         :class="getGalleryButtonClass(img)"
-        :style="getImageBgStyle(img, false)"
+        :style="getImageButtonStyle(img)"
+        :disabled="disableButtons"
         @click="setSelectedImage(img)"
       ></button>
     </div>
@@ -145,24 +246,66 @@
         devName: 'not yet defined',
         selectedDev: {name: 'undefined', images: []},
         selectedImage: 'raspberries.jpg',
+        nextImage: 'fruits-lemons.jpg',
+        prevImage: 'fruits-mangoes.png',
+        isSlidingLeft: false,
+        isSlidingRight: false,
         allDevs: [
-          {name: 'alian', images: []},
+          {name: 'alian', images: ['alian-1.jpg', 'alian-2.jpg', 'alian-3.png']},
           {name: 'cory', images: ['cory-1.jpg', 'cory-2.jpg', 'cory-3.jpg', 'cory-4.jpg']},
-          {name: 'eduardo', images: []},
+          {name: 'eduardo', images: ['eduardo-1.png', 'eduardo-2.png', 'eduardo-3.png', 'eduardo-4.png', 'eduardo-5.png', 'eduardo-6.png']},
           {name: 'mark', images: ['mark-1.png', 'mark-2.png', 'mark-3.png', 'mark-4.png', 'mark-5.png', 'mark-6.png']},
-          {name: 'michael', images: []},
+          {name: 'michael', images: ['michael-1.png', 'michael-2.png', 'michael-3.png', 'michael-4.png', 'michael-5.png']},
           {name: 'ray', images: ['ray-1.png', 'ray-2.png', 'ray-3.png']},
-          {name: 'sylvia', images: []},
-          {name: 'zsannen', images: []},
+          {name: 'sylvia', images: ['sylvia-1.png', 'sylvia-2.png', 'sylvia-3.png', 'sylvia-4.png', 'sylvia-5.png', 'sylvia-6.jpeg']},
+          {name: 'zsannen', images: ['zsannen-1.png', 'zsannen-2.png', 'zsannen-3.png', 'zsannen-4.png', 'zsannen-5.png', 'zsannen-6.png']},
         ],
       },
       methods: {
         setSelectedDev(dev) {
-          this.selectedDev = dev;
-          this.selectedImage = dev?.images?.length ? dev.images[0] : 'raspberries.jpg';
+          // when picking a new dev, set the first image in the dev's images array as next/right image
+          const next = dev?.images?.length ? dev.images[0] : 'fruits-lemons.jpg';
+          const prev = dev?.images?.length ? dev.images[dev.images.length - 1] : 'fruits-mangoes.png';
+          this.nextImage = next;
+          this.prevImage = prev;
+          this.isSlidingRight = true;
+          this.isSlidingLeft = false;
+          setTimeout(() => {
+            this.selectedDev = dev;
+            this.selectedImage = next;
+            this.nextImage = dev.images[1];
+            this.isSlidingRight = false;
+          }, 1000);
         },
         setSelectedImage(img) {
+          const {images} = this.selectedDev || {};
           this.selectedImage = img;
+          const newCurrIdx = images.indexOf(img);
+          let nextIdx = newCurrIdx + 1; // add 1 to newCurrIdx to get the new nextIdx
+          if (nextIdx >= images.length) nextIdx = 0; // if nextIdx goes beyond end of slideshow, loop back to 0
+          let prevIdx = newCurrIdx - 1; // subtract 1 from newCurrIdx to get the new prevIdx
+          if (prevIdx < 0) prevIdx = images.length - 1; // if we're at less than 0, jump to end of slideshow
+          this.nextImage = images[nextIdx];
+          this.prevImage = images[prevIdx];
+        },
+        onArrowClick(inc) {
+          const {images} = this.selectedDev || {};
+          this.isSlidingRight = inc > 0;
+          this.isSlidingLeft = inc < 0;
+          // set newCurrIdx as index of the next or previous image, depending if we're moving backwards or forwards
+          // we can always assume the next/previous images do have valid indices
+          const newCurrIdx = images.indexOf(inc > 0 ? this.nextImage : this.prevImage);
+          let nextIdx = newCurrIdx + 1; // add 1 to newCurrIdx to get the new nextIdx
+          if (nextIdx >= images.length) nextIdx = 0; // if nextIdx goes beyond end of slideshow, loop back to 0
+          let prevIdx = newCurrIdx - 1; // subtract 1 from newCurrIdx to get the new prevIdx
+          if (prevIdx < 0) prevIdx = images.length - 1; // if we're at less than 0, jump to end of slideshow
+          setTimeout(() => {
+            this.selectedImage = images[newCurrIdx];
+            this.nextImage = images[nextIdx];
+            this.prevImage = images[prevIdx];
+            this.isSlidingRight = false;
+            this.isSlidingLeft = false;
+          }, 1000);
         },
         getNameButtonClass(name) {
           if (name === this.selectedDev.name) return 'active-button';
@@ -172,22 +315,39 @@
           if (img === this.selectedImage) return 'active-gallery-button';
           return '';
         },
-        getImageBgStyle(selectedImage, doContain) {
+        getImageButtonStyle(img) {
+          let gradient = '';
+          let shadowColor = 'rgba(0,0,0,0)';
+          if (this.selectedImage !== img) {
+            gradient = 'linear-gradient(to bottom, rgba(100, 100, 255, 0.52), rgba(100, 100, 255, 0.73)), ';
+            shadowColor = 'rgba(0,0,0,0.5)';
+          }
           return {
-            backgroundImage: `url("./images/${selectedImage}")`,
-            backgroundColor: 'mediumvioletred',
+            backgroundImage: `${gradient}url("./images/${img}")`,
             backgroundPosition: 'center',
             backgroundRepeat: 'no-repeat',
-            backgroundSize: doContain ? 'contain' : 'cover',
+            backgroundSize: 'cover',
+            boxShadow: `4px 4px 8px inset ${shadowColor}, -4px -4px 8px inset ${shadowColor}`,
+          };
+        },
+        getImageBgStyle(img) {
+          const newImg = (!!img) ? img : 'raspberries.jpg';
+          return {
+            backgroundImage: `url("./images/${newImg}")`,
+            backgroundColor: 'rgb(0, 100, 175)',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            backgroundSize:'contain',
           };
         },
       },
       computed: {
-      },
-      mounted() {
-        this.$nextTick(() => {
-          console.log('mounted!');
-        });
+        showArrows() {
+          return !!this.selectedDev?.images?.length;
+        },
+        disableButtons() {
+          return this.isSlidingLeft || this.isSlidingRight;
+        },
       },
     });
 
